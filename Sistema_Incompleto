@@ -5,106 +5,81 @@ public class Main {
         Scanner input = new Scanner(System.in);
         ListaAlunos lista = new ListaAlunos();
 
-
         int respostaMenu = 0;
 
         while (respostaMenu != 5) {
-            System.out.println("Gerenciamento de Alunos - ");
-            System.out.println("1 - Cadastrar aluno\n" +
-                                "2 - Remova um Aluno\n" +
-                                "3 - Mostrar Alunos\n" +
-                                "4 - Mostrar Aluno Especifico (Pelo RGM)" +
-                                "\n5- Sair do progama -");
+            System.out.println("\nGerenciamento de Alunos:");
+            System.out.println("1 - Cadastrar aluno");
+            System.out.println("2 - Remover aluno");
+            System.out.println("3 - Mostrar todos os alunos");
+            System.out.println("4 - Buscar aluno por RGM");
+            System.out.println("5 - Sair do programa");
 
-            System.out.println("Digite sua resposta: ");
+            System.out.print("Digite sua resposta: ");
             respostaMenu = input.nextInt();
 
             switch (respostaMenu) {
                 case 1:
-                    if(lista.ListaCheia()){
+                    if (lista.ListaCheia()) {
                         System.out.println("A lista está cheia!");
-                        break;
+                    } else {
+                        matricularAluno(lista);
                     }
+                    break;
 
-                    System.out.println("Digite o rgm do aluno: ");
-                    int rgm = input.nextInt();
-                    input.nextLine();
-
-                    System.out.println("Digite o nome do aluno: ");
-                    String nome = input.nextLine();
-
-                    Cadastro aluno = new Cadastro(rgm, nome);
-
-                    while(true){
-                        System.out.println("Digite o nome da disciplina: ");
-                        String nomeDisciplina = input.nextLine();
-
-                        System.out.println("Digite a nota do aluno na disciplina: ");
-                        Double nota = input.nextDouble();
-                        input.nextLine();
-
-                        aluno.adicionarDisciplina(nomeDisciplina, nota);
-
-                        System.out.println("Deseja adicionar mais disciplinas? (S/N)");
-                        String resposta = input.nextLine();
-
-                        if(resposta.equalsIgnoreCase("N")){
-                            break;
-                        }
-                    }
-
-                    if (lista.adicionar(aluno)) {
-                        System.out.println("Aluno adicionado com sucesso!");
-                    }
-                    System.out.println("Deseja adicionar mais alunos? (S/N): ");
-                    String resposta = input.nextLine();
-
-                    if (resposta.equalsIgnoreCase("N")) {
-                        break;
-                    }
                 case 2:
                     apagarContato(lista);
                     break;
+
                 case 3:
                     lista.imprimirLista();
+                    System.out.println("\n---------------------------------");
+                    break;
+
                 case 4:
                     System.out.println("Digite o RGM do aluno a ser encontrado:");
                     int numero = input.nextInt();
+                    input.nextLine();
+                    boolean encontrado = false;
 
-                    for (int i = 0; i <= 60 ; i++){
-                        if(lista.items[i].rgm == numero){
+                    for (int i = 0; i < lista.tamanho; i++) {
+                        if (lista.items[i].rgm == numero) {
                             System.out.println(lista.items[i]);
-                            break;
-                        }
-                        else{
-                            System.out.println("RGM não encontrado !");
+                            encontrado = true;
                             break;
                         }
                     }
+
+                    if (!encontrado) {
+                        System.out.println("RGM não encontrado!");
+                    }
+                    break;
+
                 case 5:
-                    System.out.println("Saindo do programa... ");
+                    System.out.println("Saindo do programa...");
+                    break;
+
                 default:
                     System.out.println("Opção inválida, tente novamente.");
                     break;
-
             }
         }
-
     }
+
     //--------------------------- APAGAR CONTATO ---------------------------------
     public static void apagarContato(ListaAlunos lista) {
         Scanner input = new Scanner(System.in);
 
-        int tamanho = 60;
+        int resposta;
+        do {
+            System.out.println("\nEscolha uma das opções:");
+            System.out.println("1 - Cancelar matrícula");
+            System.out.println("2 - Exibir lista de alunos atualizada");
+            System.out.println("3 - Voltar");
 
-        System.out.println("Escolha uma das opções:\n " +
-                "1- Cancelar Matrícula\n " +
-                "2- Exibir lista de alunos atualizada\n" +
-                "3- Voltar");
-        int resposta = input.nextInt();
-        input.nextLine();
+            resposta = input.nextInt();
+            input.nextLine();
 
-        while (resposta != 3) {
             switch (resposta) {
                 case 1:
                     System.out.println("Digite o RGM do aluno a ser apagado: ");
@@ -119,13 +94,17 @@ public class Main {
                             break;
                         }
                     }
+
                     if (!encontrado) {
                         System.out.println("RGM não encontrado!");
+                    } else {
+                        ordenarArray(lista);
+                        lista.tamanho--; // reduz o tamanho
+                        System.out.println("Aluno removido com sucesso.");
                     }
                     break;
 
                 case 2:
-                    System.out.println("Lista de alunos ATUALIZADA! ");
                     lista.imprimirLista();
                     break;
 
@@ -137,57 +116,88 @@ public class Main {
                     System.out.println("Opção inválida, tente novamente.");
                     break;
             }
-            //Solicita novamente a escolha do usuário
-            System.out.println("Escolha uma das opções:\n " +
-                    "1- Apagar Matricula\n " +
-                    "2- Exibir lista de alunos atualizada\n" +
-                    "3- Voltar");
-            resposta = input.nextInt();
+
+        } while (resposta != 3);
+    }
+
+    //------------------------------- MATRICULAR ALUNO ---------------------------------
+    public static void matricularAluno(ListaAlunos lista) {
+        Scanner input = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\nDigite o RGM do aluno: ");
+            int rgm = input.nextInt();
             input.nextLine();
+
+            System.out.println("Digite o nome do aluno: ");
+            String nome = input.nextLine();
+
+            Cadastro aluno = new Cadastro(rgm, nome);
+
+            while (true) {
+                System.out.println("Digite o nome da disciplina: ");
+                String nomeDisciplina = input.nextLine();
+
+                System.out.println("Digite a nota do aluno na disciplina: ");
+                double nota = input.nextDouble();
+                input.nextLine();
+
+                aluno.adicionarDisciplina(nomeDisciplina, nota);
+
+                System.out.println("Deseja adicionar mais disciplinas? (S/N)");
+                String respostaDisc = input.nextLine();
+                if (respostaDisc.equalsIgnoreCase("N")) {
+                    break;
+                }
+            }
+
+            if (lista.adicionar(aluno)) {
+                System.out.println("Aluno adicionado com sucesso!");
+            }
+
+            System.out.println("Deseja adicionar mais alunos? (S/N): ");
+            String respostaAluno = input.nextLine();
+            if (respostaAluno.equalsIgnoreCase("N")) {
+                break;
+            }
         }
     }
 
     //------------------------------ ORDENAR O ARRAY --------------------------------
-    public static void ordenarArray(String[] array) {
+    public static void ordenarArray(ListaAlunos lista) {
         int posicaoLivre = 0;
-        int tamanho = 60;
 
-        //Ordena os contatos para esquerda
-        for (int i = 0; i < tamanho; i++) {
-            if (array[i] != null) {
-                array[posicaoLivre] = array[i];
+        // Empurra os nulos para o final
+        for (int i = 0; i < lista.items.length; i++) {
+            if (lista.items[i] != null) {
+                lista.items[posicaoLivre] = lista.items[i];
                 if (posicaoLivre != i) {
-                    array[i] = null; // Define a posição antiga como null
+                    lista.items[i] = null;
                 }
                 posicaoLivre++;
             }
         }
 
-        // Agora ordena apenas os elementos válidos (não nulos)
+        // Ordena por RGM (algoritmo simples)
         for (int i = 0; i < posicaoLivre - 1; i++) {
             for (int j = i + 1; j < posicaoLivre; j++) {
-                if (array[i].compareTo(array[j]) > 0) {
-                    // Troca os elementos de posição
-                    String temp = array[i];
-                    array[i] = array[j];
-                    array[j] = temp;
+                if (lista.items[i].rgm > lista.items[j].rgm) {
+                    Cadastro temp = lista.items[i];
+                    lista.items[i] = lista.items[j];
+                    lista.items[j] = temp;
                 }
             }
         }
     }
-
-
-
 }
 
-
-
-class Disciplinas {//Classe que vai representar o subconjunto dentro de disciplina
+//------------------------------ CLASSES AUXILIARES --------------------------------
+class Disciplinas {
     String nome;
     Double nota;
     Disciplinas proxima;
 
-    public Disciplinas(String nome, Double nota){
+    public Disciplinas(String nome, Double nota) {
         this.nome = nome;
         this.nota = nota;
         this.proxima = null;
@@ -199,72 +209,73 @@ class Disciplinas {//Classe que vai representar o subconjunto dentro de discipli
     }
 }
 
-class Cadastro{//Classe que representa o Cadastro do nome e Rgm do aluno
+class Cadastro {
     int rgm;
     String nome;
     Disciplinas primeiraDisciplina;
 
-    public Cadastro(int rgm, String nome){
+    public Cadastro(int rgm, String nome) {
         this.rgm = rgm;
         this.nome = nome;
         this.primeiraDisciplina = null;
     }
 
-    public void adicionarDisciplina(String nomeDisciplina, Double nota){
+    public void adicionarDisciplina(String nomeDisciplina, Double nota) {
         Disciplinas novaDisciplina = new Disciplinas(nomeDisciplina, nota);
 
-        if(primeiraDisciplina == null){//verifica se já tem alguma disciplina
+        if (primeiraDisciplina == null) {
             primeiraDisciplina = novaDisciplina;
-        }else{
+        } else {
             Disciplinas atual = primeiraDisciplina;
-            while(atual.proxima != null){//percorre o array até achar o último item, onde o proximo vai ser = null
+            while (atual.proxima != null) {
                 atual = atual.proxima;
             }
             atual.proxima = novaDisciplina;
         }
-
     }
 
     @Override
     public String toString() {
         StringBuilder resultado = new StringBuilder();
-        resultado.append("Cadastro - ")
-                .append("rgm=").append(rgm)
-                .append(", nome= ").append(nome);
+        resultado.append("---------------------------------\n")
+                .append("Cadastro - ")
+                .append("RGM: ").append(rgm)
+                .append(", Nome: ").append(nome);
 
-        if(primeiraDisciplina != null){
-            resultado.append("\n Disciplinas: \n");
+        if (primeiraDisciplina != null) {
+            resultado.append("\nDisciplinas:\n");
             Disciplinas atual = primeiraDisciplina;
-            while(atual!=null){//Começa na primeira, enquanto a disciplina atual não for = null, ele processa e segue em frente
+            while (atual != null) {
                 resultado.append("  ").append(atual).append("\n");
-                atual = atual.proxima;//cada disciplina tem o atributo proxima, quando ele for null, significa que chegamos ao final
+                atual = atual.proxima;
             }
         }
         return resultado.toString();
     }
 }
 
-class ListaAlunos {//Classe que vai implementar cada cadastro
+class ListaAlunos {
     public Cadastro[] items;
     public int tamanho;
     private static final int CAPACIDADE_MAXIMA = 60;
 
-    public ListaAlunos() {//Classe que vai definir a capacidade da Lista
+    public ListaAlunos() {
         this.items = new Cadastro[CAPACIDADE_MAXIMA];
         this.tamanho = 0;
     }
-    public boolean adicionar(Cadastro aluno){
-        if (tamanho >= CAPACIDADE_MAXIMA){
+
+    public boolean adicionar(Cadastro aluno) {
+        if (tamanho >= CAPACIDADE_MAXIMA) {
             System.out.println("A lista está cheia!");
             return false;
         }
 
         int posicao = 0;
-        while(posicao < tamanho && items[posicao].rgm < aluno.rgm){//Achar a posição a ser inserido o rgm.
+        while (posicao < tamanho && items[posicao].rgm < aluno.rgm) {
             posicao++;
         }
 
-        for(int i = tamanho; i > posicao; i--){
+        for (int i = tamanho; i > posicao; i--) {
             items[i] = items[i - 1];
         }
 
@@ -272,15 +283,17 @@ class ListaAlunos {//Classe que vai implementar cada cadastro
         tamanho++;
         return true;
     }
-    public boolean ListaCheia(){
+
+    public boolean ListaCheia() {
         return tamanho >= CAPACIDADE_MAXIMA;
     }
-    public void imprimirLista(){
-        if (tamanho == 0){
-            System.out.println("Nenhum aluno está cadastrado. ");
+
+    public void imprimirLista() {
+        if (tamanho == 0) {
+            System.out.println("Nenhum aluno está cadastrado.");
             return;
         }
-        for (int i = 0; i < tamanho; i++){
+        for (int i = 0; i < tamanho; i++) {
             System.out.println(items[i]);
         }
     }
